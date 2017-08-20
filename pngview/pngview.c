@@ -81,6 +81,7 @@ void usage(void)
     fprintf(stderr, "         e.g. 0x000F is opaque black\n");
     fprintf(stderr, "    -d - Raspberry Pi display number\n");
     fprintf(stderr, "    -l - DispmanX layer number\n");
+    fprintf(stderr, "    -t - Timeout in ms\n");
     fprintf(stderr, "    -x - offset (pixels from the left)\n");
     fprintf(stderr, "    -y - offset (pixels from the top)\n");
     fprintf(stderr, "    -n - non-interactive mode\n");
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
     uint16_t background = 0x000F;
     int32_t layer = 1;
     uint32_t displayNumber = 0;
+    uint32_t timeout = 0;
     int32_t xOffset = 0;
     int32_t yOffset = 0;
     bool xOffsetSet = false;
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
 
     int opt = 0;
 
-    while ((opt = getopt(argc, argv, "b:d:l:x:y:n")) != -1)
+    while ((opt = getopt(argc, argv, "b:d:l:t:x:y:n")) != -1)
     {
         switch(opt)
         {
@@ -124,6 +126,11 @@ int main(int argc, char *argv[])
         case 'l':
 
             layer = strtol(optarg, NULL, 10);
+            break;
+
+        case 't':
+
+            timeout = atoi(optarg);
             break;
 
         case 'x':
@@ -322,9 +329,17 @@ int main(int argc, char *argv[])
                 assert(result == 0);
             }
         }
-        else
+        if (!interactive)
         {
-            usleep(100000);
+            if (timeout != 0)
+            {
+                usleep(timeout*1000);
+                run = false;
+            }
+            else
+            {
+                usleep(100000);
+            }
         }
     }
 
@@ -350,4 +365,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
